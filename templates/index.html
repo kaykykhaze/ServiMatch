@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ServiMatch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <a class="brand" href="/">Servi<span>Match</span></a>
+        <nav>
+            <a href="/">Encontrar profissionais</a>
+            <button class="nav-pendente" type="button" disabled title="Funcionalidade em desenvolvimento">Minhas solicitações</button>
+        </nav>
+    </header>
+    <main>
+        <div class="intro">
+            <small>SERVIÇOS LOCAIS, CONEXÕES MELHORES</small>
+            <h1>O profissional certo<br>para o que você precisa.</h1>
+            <p>Compare opções e encontre compatibilidade com sua região, orçamento e turno.</p>
+        </div>
+        <form class="filters" onsubmit="return false;">
+            <label>Serviço
+                <select name="servico">
+                    <option>Todos os serviços</option>
+                    <option>Eletricista</option>
+                    <option>Encanador</option>
+                    <option>Tecnologia</option>
+                </select>
+            </label>
+            <label>Cidade<input name="cidade" value="Valença" maxlength="80"></label>
+            <label>Orçamento (R$)<input name="orcamento" type="number" min="0" value="150"></label>
+            <label>Turno
+                <select name="turno"><option>Manhã</option><option>Tarde</option><option>Noite</option></select>
+            </label>
+            <button type="button" disabled title="Busca e Match em desenvolvimento">Encontrar meu Match</button>
+        </form>
+    </main>
+</body>
+</html>
