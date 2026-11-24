@@ -1,41 +1,17 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>ServiMatch</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <a class="brand" href="/">Servi<span>Match</span></a>
-        <nav>
-            <a href="/">Encontrar profissionais</a>
-            <button class="nav-pendente" type="button" disabled title="Funcionalidade em desenvolvimento">Minhas solicitações</button>
-        </nav>
-    </header>
-    <main>
-        <div class="intro">
-            <small>SERVIÇOS LOCAIS, CONEXÕES MELHORES</small>
-            <h1>O profissional certo<br>para o que você precisa.</h1>
-            <p>Compare opções e encontre compatibilidade com sua região, orçamento e turno.</p>
-        </div>
-        <form class="filters" onsubmit="return false;">
-            <label>Serviço
-                <select name="servico">
-                    <option>Todos os serviços</option>
-                    <option>Eletricista</option>
-                    <option>Encanador</option>
-                    <option>Tecnologia</option>
-                </select>
-            </label>
-            <label>Cidade<input name="cidade" value="Valença" maxlength="80"></label>
-            <label>Orçamento (R$)<input name="orcamento" type="number" min="0" value="150"></label>
-            <label>Turno
-                <select name="turno"><option>Manhã</option><option>Tarde</option><option>Noite</option></select>
-            </label>
-            <button type="button" disabled title="Busca e Match em desenvolvimento">Encontrar meu Match</button>
-        </form>
-    </main>
-</body>
-</html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ServiMatch</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><header><a class="brand" href="/">Servi<span>Match</span></a><nav><a href="#profissionais">Encontrar profissionais</a><a href="#solicitacoes">Minhas solicitações</a></nav></header>
+<main><div class="intro"><small>SERVIÇOS LOCAIS, CONEXÕES MELHORES</small><h1>O profissional certo<br>para o que você precisa.</h1><p>Encontre profissionais para serviços na sua região.</p></div>
+<form class="filters" id="busca"><label>Serviço<select name="servico"><option value="">Todos os serviços</option><option>Eletricista</option><option>Encanador</option><option>Técnica de informática</option></select></label><label>Cidade<input name="cidade" placeholder="Ex.: Valença" maxlength="80"></label><label>Orçamento (R$)<input name="orcamento" type="number" min="0" placeholder="Ex.: 150"></label><label>Turno<select name="turno"><option value="">Qualquer turno</option><option>Manhã</option><option>Tarde</option><option>Noite</option></select></label><button type="submit">Encontrar profissionais</button></form>
+<section id="profissionais"><h2>Profissionais</h2><p class="hint">Perfis de exemplo para conhecer a plataforma.</p><p id="vazio" hidden>Nenhum profissional encontrado com esses filtros.</p><div class="grid">
+{% for nome, servico, cidade, iniciais, preco, turno in [('Ana Souza', 'Eletricista', 'Valença', 'AS', 150, 'Manhã'), ('João Santos', 'Encanador', 'Valença', 'JS', 120, 'Tarde'), ('Marina Costa', 'Técnica de informática', 'Cairu', 'MC', 100, 'Noite')] %}
+<article data-servico="{{ servico }}" data-cidade="{{ cidade }}" data-preco="{{ preco }}" data-turno="{{ turno }}"><div class="top"><span class="avatar" aria-hidden="true">{{ iniciais }}</span></div><h3>{{ nome }}</h3><p><strong>{{ servico }}</strong><br>{{ cidade }} · {{ turno }}<br>Valor de referência: R$ {{ preco }}</p><details><summary>Solicitar serviço</summary><form class="pedido" data-profissional="{{ nome }}"><label>Seu nome<input name="nome" required maxlength="80"></label><label>Descreva o serviço<textarea name="descricao" rows="3" required maxlength="500"></textarea></label><button type="submit">Registrar solicitação</button></form></details></article>
+{% endfor %}</div></section><section id="solicitacoes"><h2>Minhas solicitações</h2><p class="hint">As solicitações ficam salvas neste navegador e não são enviadas aos profissionais.</p><div id="lista"></div></section></main><footer>ServiMatch</footer>
+<script>
+const normalizar = s => s.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const cards = [...document.querySelectorAll('article[data-servico]')];
+document.querySelector('#busca').addEventListener('submit', e => { e.preventDefault(); const f = new FormData(e.currentTarget); let total = 0; cards.forEach(card => { const ok = (!f.get('servico') || card.dataset.servico === f.get('servico')) && normalizar(card.dataset.cidade).includes(normalizar(f.get('cidade'))) && (!f.get('orcamento') || Number(card.dataset.preco) <= Number(f.get('orcamento'))) && (!f.get('turno') || card.dataset.turno === f.get('turno')); card.hidden = !ok; if (ok) total++; }); document.querySelector('#vazio').hidden = total > 0; document.querySelector('#profissionais').scrollIntoView(); });
+const chave = 'servimatch-solicitacoes';
+function mostrar() { const lista = document.querySelector('#lista'); lista.replaceChildren(); let pedidos = []; try { pedidos = JSON.parse(localStorage.getItem(chave) || '[]'); } catch (_) {} if (!pedidos.length) { lista.textContent = 'Você ainda não registrou solicitações.'; return; } pedidos.forEach(p => { const item = document.createElement('article'); item.className = 'request'; const titulo = document.createElement('h3'); titulo.textContent = p.profissional; const texto = document.createElement('p'); texto.textContent = p.nome + ': ' + p.descricao; item.append(titulo, texto); lista.append(item); }); }
+document.querySelectorAll('.pedido').forEach(form => form.addEventListener('submit', e => { e.preventDefault(); const dados = new FormData(form); try { const pedidos = JSON.parse(localStorage.getItem(chave) || '[]'); pedidos.unshift({profissional: form.dataset.profissional, nome: dados.get('nome').trim(), descricao: dados.get('descricao').trim()}); localStorage.setItem(chave, JSON.stringify(pedidos)); form.reset(); form.closest('details').open = false; mostrar(); document.querySelector('#solicitacoes').scrollIntoView(); } catch (_) { alert('Não foi possível salvar a solicitação neste navegador.'); } })); mostrar();
+</script></body></html>

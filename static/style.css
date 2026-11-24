@@ -221,4 +221,8 @@ footer {
 button:disabled {
     opacity: 1;
     cursor: default;
-}
+}.aviso { background: #e4f5ef; border-left: 4px solid #087f70; padding: 14px 18px; border-radius: 4px; }
+nav span { color: #536075; font-size: 14px; }
+button:disabled { background: #dce4e5; color: #536075; cursor: not-allowed; }
+summary { cursor: pointer; }
+[hidden] { display: none !important; }
